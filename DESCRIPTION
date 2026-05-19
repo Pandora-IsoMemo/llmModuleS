@@ -18,7 +18,7 @@ Imports:
     shiny,
     shinyAce,
     shinyjs,
-    shinyTools
+    shinyTools (>= 26.05.0)
 Suggests:
     lintr (>= 1.0.2),
     testthat (>= 2.0.0),
