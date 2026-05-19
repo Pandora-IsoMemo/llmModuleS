@@ -14,7 +14,7 @@ LazyData: true
 Depends: R (>= 3.5.0)
 Imports:
     futile.logger,
-    llmModule,
+    llmModule (>= 26.05.0),
     shiny,
     shinyAce,
     shinyjs,
