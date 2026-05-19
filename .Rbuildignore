@@ -1,0 +1,16 @@
+^.*\.Rproj$
+^Dockerfile$
+^docker-compose.yml
+^Jenkinsfile$
+^JenkinsfileMPI$
+^bin$
+^LICENSE\.md$
+^deploy\.sh$
+^\..*$
+^\.Rproj\.user$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^inst/RScripts
+^tests/testthat/testdata_large/
