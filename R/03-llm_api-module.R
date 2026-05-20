@@ -32,7 +32,6 @@ llm_api_ui <- function(id, title = NULL) {
 # ---- Server Function ----
 llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
     ollama_available <- requireNamespace("ollamar", quietly = TRUE) &&
