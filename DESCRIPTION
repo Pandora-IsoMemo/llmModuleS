@@ -1,13 +1,14 @@
 Package: llmModuleS
 Type: Package
-Title: R Shiny interface for Large Language Model APIs
+Title: Shiny Modules and App for Large Language Model APIs
 Version: 26.05.0
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
             )
-Description: Provides a Shiny interface for interacting with Large Language Model (LLM) APIs such
-    as OpenAI and DeepSeek.
+Description: Provides reusable Shiny modules and an application entry point for interacting with
+    remote and local Large Language Model (LLM) APIs. This package was extracted from
+    llmModule and uses llmModule for core LLM API abstractions.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
