@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/pkgdown.yaml)
+[![docker-publish](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/docker-publish.yml)
 <!-- badges: end -->
 
 `llmModuleS` provides reusable Shiny modules and an app entry point for generating text with Large Language Models (LLMs).
