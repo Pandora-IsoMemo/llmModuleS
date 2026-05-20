@@ -1,3 +1,3 @@
 library(profvis)
 library(shiny)
-profvis({startApplication()})
+profvis({llmModuleS::startApplication()})
