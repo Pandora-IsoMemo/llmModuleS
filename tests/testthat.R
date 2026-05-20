@@ -1,4 +1,4 @@
 library(testthat)
-library(llmModule)
+library(llmModuleS)
 
-test_check("llmModule")
+test_check("llmModuleS")
