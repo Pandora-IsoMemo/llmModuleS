@@ -1,6 +1,7 @@
 # llmModuleS
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModuleS/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `llmModuleS` provides reusable Shiny modules and an app entry point for generating text with Large Language Models (LLMs).
