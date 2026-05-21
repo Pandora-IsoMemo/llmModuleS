@@ -68,7 +68,8 @@ llm_generate_prompt_ui <- function(id,
 #' @param exclude_pattern character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
-#' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
+#' @return A reactive value (`reactiveVal`) containing the generated response tables, which
+#'  can be used for further processing in the app.
 #'
 #' @details
 #' The server module:
@@ -93,6 +94,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
+    llm_response_tables <- reactiveVal()
 
     # disable generate button if no API key is available
     observe({
@@ -145,12 +147,14 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     output$generated_text <- renderPrint({
       validate(need(inherits(llm_response(), "LlmResponse"), "No response available."))
 
-      response_table <- llm_response() |>
-        llmModule::as_table(output_type = "text")
-      response_table$core_output$content |> cat()
+      response_tables <- llm_response() |>
+        llmModule::as_table(output_type = "complete")
+      llm_response_tables(response_tables)
+
+      response_tables$core_output$content |> cat()
     })
 
-    return(llm_response)
+    return(llm_response_tables)
   })
 }
 
