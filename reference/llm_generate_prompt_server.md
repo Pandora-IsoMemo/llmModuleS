@@ -37,8 +37,8 @@ llm_generate_prompt_server(
 
 ## Value
 
-A reactive value (\`reactiveVal\`) containing the \`LlmResponse\` object
-returned from the LLM API.
+A reactive value (\`reactiveVal\`) containing the generated response
+tables, which can be used for further processing in the app.
 
 ## Details
 
