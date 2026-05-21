@@ -1,7 +1,8 @@
 Package: llmModuleS
 Type: Package
 Title: Shiny Modules and App for Large Language Model APIs
-Version: 26.05.0
+Version: 26.05.1
+Date: 2026-05-21
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
