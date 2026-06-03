@@ -1,7 +1,7 @@
 #' @rawNamespace import(shiny)
 #'
 #' @importFrom futile.logger flog.info flog.warn flog.debug
-#' @importFrom llmModule as_table eligible_ellmer_providers get_llm_models is_ollama_running
+#' @importFrom llmModule as_table get_llm_models is_ollama_running
 #'  new_BridgedLlmApi new_LlmPromptConfig new_LlmResponse new_LocalLlmApi new_OllamaModelManager
 #'  new_RemoteLlmApi update
 #' @importFrom shinyAce aceEditor updateAceEditor
