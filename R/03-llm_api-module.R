@@ -2,32 +2,18 @@
 llm_api_ui <- function(id, title = NULL) {
   ns <- NS(id)
 
-  ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
+  ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" &&
+    is_ollama_running()
 
-  providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
-
-  providers_ellmer <- eligible_ellmer_providers()
-
-  provider_choices <- providers_ellmer[["provider_key"]]
-  names(provider_choices) <- providers_ellmer[["provider_name"]]
-
-  # remove providers that are already in legacy list
-  provider_choices <- provider_choices[!names(provider_choices) %in% names(providers_legacy)]
-
-  provider_choices <- c(providers_legacy, provider_choices)
-
-  if (ollama_available) {
-    # remove Ollama from provider choices if available, since it gets its own special UI treatment
-    # and is the default when running in Docker
-    provider_choices <- provider_choices[!names(provider_choices) == "Ollama"]
-
-    provider_choices <- c("Ollama (Local)" = "Ollama", provider_choices)
-  }
+  provider_choices <- get_providers(ollama_available)
 
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, selectInput(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
+      column(3, selectInput(ns("provider"),
+                            "Choose Provider",
+                            choices = provider_choices,
+                            selected = character(0))),
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",

@@ -27,7 +27,7 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     provider_default_model_sentinel <- "__provider_default_model__"
 
     llm_prompt_config <- reactiveVal()
-    model_choices_cache <- reactiveValues(entries = list())
+    model_info_cache <- reactiveValues(entries = list())
 
     # possibly load default values from config later ...
     fields_advanced_all <- list(
@@ -68,17 +68,17 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       paste(class(api)[1], provider, auth_key, sep = "|")
     }
 
-    get_cached_model_choices <- function(api) {
+    get_cached_model_info <- function(api) {
       key <- model_cache_key(api)
-      model_choices_cache$entries[[key]]
+      model_info_cache$entries[[key]]
     }
 
-    set_cached_model_choices <- function(api, choices) {
+    set_cached_model_info <- function(api, model_info) {
       key <- model_cache_key(api)
-      entries <- model_choices_cache$entries
-      entries[[key]] <- choices
-      model_choices_cache$entries <- entries
-      choices
+      entries <- model_info_cache$entries
+      entries[[key]] <- model_info
+      model_info_cache$entries <- entries
+      model_info
     }
 
     output$advancedInputs <- renderUI({
@@ -104,24 +104,29 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       logDebug("%s: Updating model choices", id)
       api <- llm_api()
 
-      cached_models <- if (inherits(api, "LlmApi")) get_cached_model_choices(api) else NULL
+      cached_model_info <- if (inherits(api, "LlmApi")) get_cached_model_info(api) else NULL
 
-      if (!is.null(cached_models)) {
-        logDebug("%s: Using cached model choices for provider '%s'", id, api$provider)
-        models <- cached_models
-      } else if (inherits(api, "EllmerLlmApi") && !ellmer_provider_can_list_models_with_credentials(api$provider)) {
-        models <- list()
-        set_cached_model_choices(api, models)
+      if (!is.null(cached_model_info)) {
+        logDebug("%s: Using cached model metadata for provider '%s'", id, api$provider)
+        model_info <- cached_model_info
       } else if (inherits(api, "LlmApi")) {
-        models <- get_llm_models(api) |>
+        model_info <- get_llm_models_info(api, with_creds_only = TRUE) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
-        set_cached_model_choices(api, models)
+
+        if (!is_LlmModelsInfo(model_info)) {
+          model_info <- new_empty_LlmModelsInfo(provider = api$provider)
+        }
+
+        set_cached_model_info(api, model_info)
       } else {
-        models <- list()
+        model_info <- new_empty_LlmModelsInfo()
       }
 
+      models <- as_model_choices(model_info)
+      can_fallback_to_provider_default <- llm_models_can_fallback(model_info)
+
       choices <- if (length(models) == 0) {
-        if (inherits(api, "EllmerLlmApi") && ellmer_model_can_fallback(api$provider)) {
+        if (can_fallback_to_provider_default) {
           c("Use provider default model" = provider_default_model_sentinel)
         } else {
           c("No models found..." = "")
@@ -130,7 +135,8 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         models
       }
       updateSelectInput(session, "model", choices = choices)
-    }) |> bindEvent(llm_api())
+    }) |>
+      bindEvent(llm_api())
 
     observe({
       req(prompt_reactive())
