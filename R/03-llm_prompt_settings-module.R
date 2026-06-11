@@ -113,13 +113,13 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         model_info <- get_llm_models_info(api, with_creds_only = TRUE) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
 
-        if (!is_LlmModelsInfo(model_info)) {
-          model_info <- new_empty_LlmModelsInfo(provider = api$provider)
+        if (!is_LlmModelsInfo(model_info)) { # in case of error during fetching models
+          model_info <- new_empty_LlmModelsInfo(provider = api$provider, listing_status = "error")
         }
 
         set_cached_model_info(api, model_info)
-      } else {
-        model_info <- new_empty_LlmModelsInfo()
+      } else { # if api is not LlmApi
+        model_info <- new_empty_LlmModelsInfo(listing_status = "error")
       }
 
       models <- as_model_choices(model_info)
@@ -184,13 +184,6 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     llm_prompt_config
   })
-}
-
-# Append attribute to object
-append_attr <- function(object, val, attr_name) {
-  existing <- attr(object, attr_name)
-  attr(object, attr_name) <- c(existing, val)
-  object
 }
 
 
