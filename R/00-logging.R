@@ -11,7 +11,9 @@ logWarn <- function(msg, ...) {
 }
 
 init_logging <- function() {
-  if (as.logical(Sys.getenv("SHOW_DEBUG", unset = "FALSE"))) {
+  show_debug <- tolower(Sys.getenv("SHOW_DEBUG", unset = "false")) %in% c("true", "1", "yes", "y")
+
+  if (isTRUE(show_debug)) {
     futile.logger::flog.threshold(futile.logger::DEBUG)
     base::packageStartupMessage("Logger initialized: threshold = DEBUG")
   } else {
