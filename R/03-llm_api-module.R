@@ -22,8 +22,22 @@ llm_api_ui <- function(id, title = NULL) {
       conditionalPanel(
         ns = ns,
         condition = "input.provider == 'Ollama'",
-        column(3, textInput(ns("new_model"), "Pull model", placeholder = "tinyllama")),
-        column(2, style = "margin-top: 1.75em", actionButton(ns("pull_ollama"), "Pull"))
+        column(3,
+          textInput(
+            ns("new_model"),
+            label = tagList(
+              "Download a new model ",
+              tags$a(
+                "(browse)",
+                href = "https://ollama.com/search",
+                target = "_blank",
+                rel = "noopener noreferrer"
+              )
+            ),
+            placeholder = "tinyllama:latest"
+          )
+        ),
+        column(2, style = "margin-top: 1.75em", actionButton(ns("pull_ollama"), "Download"))
       ),
       column(4, align = "right", status_message_ui(ns("api_status")))
     ),
