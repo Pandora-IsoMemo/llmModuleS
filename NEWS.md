@@ -1,6 +1,7 @@
-# llmModuleS 26.06.0
+# llmModuleS 26.08.0
 
 ## Updates
+- Updated the Shiny modules to support “bridge” providers (via new_BridgedLlmApi), improved model metadata handling in prompt settings, and added package-level logging initialization.
 
 # llmModuleS 26.05.1
 
