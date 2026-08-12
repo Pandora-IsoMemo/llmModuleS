@@ -24,8 +24,10 @@ llm_prompt_config_ui <- function(id) {
 llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal("")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    provider_default_model_sentinel <- "__provider_default_model__"
 
     llm_prompt_config <- reactiveVal()
+    model_info_cache <- reactiveValues(entries = list())
 
     # possibly load default values from config later ...
     fields_advanced_all <- list(
@@ -37,6 +39,9 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     fields_advanced_provider <- list(
       Ollama = list(),
+      Bridge = list(
+        list(fun = numericInput, args = list(ns("n"), "No. of Completions (n)", value = 1, min = 1))
+      ),
       DeepSeek = list(
         list(fun = numericInput, args = list(ns("n"), "No. of Completions (n)", value = 1, min = 1))
       ),
@@ -48,41 +53,104 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       )
     )
 
+    # one-way hash — key material cannot be recovered from the cache key
+    fingerprint_text <- function(value) {
+      if (is.null(value)) {
+        return("")
+      }
+
+      text <- paste(value, collapse = "")
+      as.character(openssl::sha256(charToRaw(text)))
+    }
+
+    model_cache_key <- function(api) {
+      provider <- if (!is.null(api$provider)) api$provider else "unknown"
+      auth_key <- fingerprint_text(if (!is.null(api$api_key)) api$api_key else "")
+      paste(class(api)[1], provider, auth_key, sep = "|")
+    }
+
+    get_cached_model_info <- function(api) {
+      key <- model_cache_key(api)
+      model_info_cache$entries[[key]]
+    }
+
+    set_cached_model_info <- function(api, model_info) {
+      key <- model_cache_key(api)
+      entries <- model_info_cache$entries
+      entries[[key]] <- model_info
+      model_info_cache$entries <- entries
+      model_info
+    }
+
     output$advancedInputs <- renderUI({
       req(llm_api(), llm_api()$provider)
+      logDebug("%s: Rendering advanced inputs for provider '%s'", id, llm_api()$provider)
+
+      provider_fields <- fields_advanced_provider[[llm_api()$provider]]
+      if (is.null(provider_fields)) {
+        provider_fields <- fields_advanced_provider$Bridge
+      }
+
       tagList(
         fluidRow(
           lapply(fields_advanced_all, function(f) column(3, do.call(f$fun, f$args)))
         ),
         fluidRow(
-          lapply(fields_advanced_provider[[llm_api()$provider]], function(f) column(3, do.call(f$fun, f$args)))
+          lapply(provider_fields, function(f) column(3, do.call(f$fun, f$args)))
         )
       )
     })
 
     observe({
+      logDebug("%s: Updating model choices", id)
       api <- llm_api()
-      if (inherits(api, "LlmApi")) {
-        models <- llmModule::get_llm_models(api) |>
+
+      cached_model_info <- if (inherits(api, "LlmApi")) get_cached_model_info(api) else NULL
+
+      if (!is.null(cached_model_info)) {
+        logDebug("%s: Using cached model metadata for provider '%s'", id, api$provider)
+        model_info <- cached_model_info
+      } else if (inherits(api, "LlmApi")) {
+        model_info <- get_llm_models_info(api, with_creds_only = TRUE) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
-      } else {
-        models <- list()
+
+        if (!is_LlmModelsInfo(model_info)) { # in case of error during fetching models
+          model_info <- new_empty_LlmModelsInfo(provider = api$provider, listing_status = "error")
+        }
+
+        set_cached_model_info(api, model_info)
+      } else { # if api is not LlmApi
+        model_info <- new_empty_LlmModelsInfo(listing_status = "error")
       }
 
+      models <- as_model_choices(model_info)
+      can_fallback_to_provider_default <- llm_models_can_fallback(model_info)
+
       choices <- if (length(models) == 0) {
-        c("No models found..." = "")
+        if (can_fallback_to_provider_default) {
+          c("Use provider default model" = provider_default_model_sentinel)
+        } else {
+          c("No models found..." = "")
+        }
       } else {
         models
       }
       updateSelectInput(session, "model", choices = choices)
-    }) |> bindEvent(llm_api())
+    }) |>
+      bindEvent(llm_api())
 
     observe({
       req(prompt_reactive())
-      new_settings <- llmModule::new_LlmPromptConfig(
+      logDebug("%s: Updating prompt configuration", id)
+
+      selected_model <- input$model
+      using_provider_default <- identical(selected_model, provider_default_model_sentinel) || identical(selected_model, "")
+      selected_model <- if (using_provider_default) NULL else selected_model
+
+      new_settings <- new_LlmPromptConfig(
         # all providers:
         prompt_content = prompt_reactive(),
-        model = input$model,
+        model = selected_model,
         max_tokens = input$max_tokens,
         temperature = input$temperature,
         prompt_role = input$prompt_role,
@@ -97,6 +165,12 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         logprobs = input$logprobs
       ) |>
         shinyTryCatch(errorTitle = "Prompt inputs setup failed", alertStyle = "shinyalert")
+
+      if (inherits(new_settings, "LlmPromptConfig") && using_provider_default) {
+        provider <- if (inherits(llm_api(), "LlmApi") && !is.null(llm_api()$provider)) llm_api()$provider else "selected provider"
+        default_msg <- sprintf("No explicit model selected; using the provider default model for '%s'.", provider)
+        new_settings <- append_attr(new_settings, default_msg, "message")
+      }
 
       llm_prompt_config(new_settings)
     })

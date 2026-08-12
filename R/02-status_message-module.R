@@ -52,6 +52,7 @@ status_message_ui <- function(id) {
 statusMessageServer <- function(id, object, ...) {
   moduleServer(id, function(input, output, session) {
     observe({
+      logDebug("%s: Updating status messages", id)
       status <- new_StatusMessage(object(), ...)
 
       output$error <-

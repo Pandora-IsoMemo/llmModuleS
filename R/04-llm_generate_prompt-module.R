@@ -68,8 +68,7 @@ llm_generate_prompt_ui <- function(id,
 #' @param exclude_pattern character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
-#' @return A reactive value (`reactiveVal`) containing the generated response tables, which
-#'  can be used for further processing in the app.
+#' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
 #'
 #' @details
 #' The server module:
@@ -94,10 +93,10 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
-    llm_response_tables <- reactiveVal()
 
     # disable generate button if no API key is available
     observe({
+      logDebug("%s: Checking API and prompt config readiness", id)
       if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_config_reactive(), "LlmPromptConfig")) {
         shinyjs::disable(ns("generate"), asis = TRUE)
       } else {
@@ -108,7 +107,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     # UPDATE AceEditor's auto-complete ----
     observe({
       logDebug("%s: update prompt", id)
-      shinyAce::updateAceEditor(
+      updateAceEditor(
         session = session,
         "prompt",
         autoCompleters = c("snippet", "text", "static", "keyword"),
@@ -120,6 +119,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
                 ignoreInit = TRUE)
 
     observe({
+      logDebug("%s: Generating new response", id)
       new_response <- llmModule::new_LlmResponse(
         llm_api_reactive(), prompt_config_reactive()
       ) |>
@@ -147,14 +147,12 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     output$generated_text <- renderPrint({
       validate(need(inherits(llm_response(), "LlmResponse"), "No response available."))
 
-      response_tables <- llm_response() |>
-        llmModule::as_table(output_type = "complete")
-      llm_response_tables(response_tables)
-
-      response_tables$core_output$content |> cat()
+      response_table <- llm_response() |>
+       llmModule::as_table(output_type = "text")
+      response_table$core_output$content |> cat()
     })
 
-    return(llm_response_tables)
+    return(llm_response)
   })
 }
 

@@ -22,8 +22,7 @@ llm_generate_prompt_server(
 available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{
-A reactive value (`reactiveVal`) containing the generated response tables, which
- can be used for further processing in the app.
+A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
 }
 \description{
 Server-side logic for handling prompt input, LLM API interaction, response handling, and error/status display.

@@ -1,8 +1,8 @@
 Package: llmModuleS
 Type: Package
 Title: Shiny Modules and App for Large Language Model APIs
-Version: 26.05.1
-Date: 2026-05-21
+Version: 26.08.0
+Date: 2026-08-11
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
@@ -13,10 +13,11 @@ Description: Provides reusable Shiny modules and an application entry point for 
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Imports:
     futile.logger,
     llmModule (>= 26.05.0),
+    openssl,
     shiny,
     shinyAce,
     shinyjs,
@@ -29,6 +30,6 @@ Suggests:
     rmarkdown
 Remotes:
     ollamar=hauselin/ollama-r@v1.2.2
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://pandora-isomemo.github.io/llmModuleS/
+Config/roxygen2/version: 8.0.0
