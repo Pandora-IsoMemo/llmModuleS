@@ -14,7 +14,7 @@ llm_api_ui <- function(id, title = NULL) {
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",
-        column(5, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt")))
+        column(5, passwordInput(ns("api_key"), "API Key"))
       ),
       conditionalPanel(
         ns = ns,
@@ -59,18 +59,13 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
     }
 
 
-    # Cache the uploaded API key path (only when a new file is uploaded)
-    api_key_path <- reactive({
-      input$api_key_file$datapath
-    })
-
-    # Trigger remote/bridge API creation when file is uploaded
+    # Trigger remote/bridge API creation when provider is selected or key changes
     remote_api <- reactive({
       req(length(input$provider) == 1, !(input$provider %in% c("Ollama", "")))
       logDebug("%s: Initializing remote API", id)
 
       new_BridgedLlmApi(
-        api_key_path = api_key_path(),
+        api_key = input$api_key,
         provider = input$provider,
         no_internet = no_internet,
         exclude_pattern = exclude_pattern
