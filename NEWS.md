@@ -1,3 +1,8 @@
+# llmModuleS 26.08.1
+
+## Updates
+- Increased image and updated dependencies in Dockerfile
+
 # llmModuleS 26.08.0
 
 ## Updates
