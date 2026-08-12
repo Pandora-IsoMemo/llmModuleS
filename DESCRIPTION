@@ -17,6 +17,7 @@ Depends: R (>= 4.1.0)
 Imports:
     futile.logger,
     llmModule (>= 26.05.0),
+    openssl,
     shiny,
     shinyAce,
     shinyjs,

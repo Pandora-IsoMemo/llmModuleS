@@ -53,13 +53,14 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       )
     )
 
+    # one-way hash — key material cannot be recovered from the cache key
     fingerprint_text <- function(value) {
       if (is.null(value)) {
         return("")
       }
 
       text <- paste(value, collapse = "")
-      paste0(sprintf("%02x", as.integer(charToRaw(text))), collapse = "")
+      as.character(openssl::sha256(charToRaw(text)))
     }
 
     model_cache_key <- function(api) {
