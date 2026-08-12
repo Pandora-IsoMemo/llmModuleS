@@ -69,11 +69,6 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
       req(length(input$provider) == 1, !(input$provider %in% c("Ollama", "")))
       logDebug("%s: Initializing remote API", id)
 
-      api_key_path(NULL)
-      if (!is.null(input$api_key_file)) {
-        api_key_path(input$api_key_file$datapath)
-      }
-
       new_BridgedLlmApi(
         api_key_path = api_key_path(),
         provider = input$provider,
