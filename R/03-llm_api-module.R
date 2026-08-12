@@ -10,10 +10,7 @@ llm_api_ui <- function(id, title = NULL) {
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, selectInput(ns("provider"),
-                            "Choose Provider",
-                            choices = provider_choices,
-                            selected = character(0))),
+      column(3, selectInput(ns("provider"), "Choose Provider", choices = provider_choices)),
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",
@@ -69,7 +66,7 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
 
     # Trigger remote/bridge API creation when file is uploaded
     remote_api <- reactive({
-      req(length(input$provider) == 1, input$provider != "Ollama")
+      req(length(input$provider) == 1, !(input$provider %in% c("Ollama", "")))
       logDebug("%s: Initializing remote API", id)
 
       api_key_path <- NULL
